@@ -126,7 +126,7 @@ int main()
     scanf("%d", &continue_ex);
     while((c = getchar()) != '\n' && c != EOF){}
 
-    if(continue_ex_ex == 1)
+    if(continue_ex == 1)
     {
       // Cleaning Runtime Variables
       prodCount = 0;
