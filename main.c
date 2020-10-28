@@ -49,7 +49,7 @@ int main()
 {
                 
                 
-        float maintime_time = clock();
+        int maintime_time = clock();
         srand(time(NULL));
         int a, prodWeightsSUM = 0, continue_ex = 1, j, c;
 
