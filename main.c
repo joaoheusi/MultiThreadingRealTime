@@ -1,18 +1,19 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <pthread.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
+#include <pthread.h>
 
-#define QTDPRODUTOS 800
+
+#define PROD_AMOUNT 800
 pthread_mutex_t lock;
 
-int i = 0, quantidadeDeProdutosPassados = 0, pesosDosProdutos[QTDPRODUTOS], numeroRandomico;
+int i = 0, prodCount = 0, prodWeights[PROD_AMOUNT], randomNumber;
 
-int simulandoSensor ()
+int generateSensorValue ()
 {
-  numeroRandomico = rand() + 1;
-  if(numeroRandomico%2 == 0)
+  randomNumber = rand() + 1;
+  if(randomNumber%2 == 0)
   {
     return 1;
   }
@@ -22,17 +23,17 @@ int simulandoSensor ()
   }
 }
 
-void* somandoProdutos(void * arg)
+void* sumProducts(void * arg)
 {
-  while(quantidadeDeProdutosPassados < QTDPRODUTOS)
+  while(prodCount < PROD_AMOUNT)
   {
-    if (simulandoSensor() == 1)
+    if (generateSensorValue() == 1)
     {
-      if(quantidadeDeProdutosPassados < QTDPRODUTOS)
+      if(prodCount < PROD_AMOUNT)
       {
         pthread_mutex_lock(&lock);
-        quantidadeDeProdutosPassados++;
-        pesosDosProdutos[i] = 1;
+        prodCount++;
+        prodWeights[i] = 1;
         i++;
         pthread_mutex_unlock(&lock);
         printf("I am locked with: %lu.\n", pthread_self());
@@ -47,11 +48,11 @@ void* somandoProdutos(void * arg)
 int main()
 {
   srand(time(NULL));
-  int a, somaDosPesosDosProdutos = 0, opcaoContinuar = 0, j, c;
+  int a, prodWeightsSUM = 0, continue = 1, j, c;
 
   do
   {
-    pthread_t pthEsteira1, pthEsteira2, pthEsteira3;
+    pthread_t threadMat1, threadMat2, threadMat3;
     pthread_attr_t attr;
     pthread_mutexattr_t mutexAttrPrioInherit;
     int mutexProtocol;
@@ -61,85 +62,85 @@ int main()
     if (mutexProtocol != PTHREAD_PRIO_INHERIT)
     {
       pthread_mutexattr_setprotocol(&mutexAttrPrioInherit, PTHREAD_PRIO_INHERIT);
-      printf("Nao estava com heranca de prioridade.\n"); // apaga depois
+      printf("No property heritage found.\n"); // apaga depois
     }
 
     if(pthread_mutex_init(&lock, NULL))
     {
-      printf("Deu SERIAMENTE MERDA");
+      printf("ERROR!!!!!!");
       return 6;
     }
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    //while(quantidadeDeProdutosPassados < QTDPRODUTOS)
+    //while(prodCount < PROD_AMOUNT)
     //{
-    if(pthread_create(&pthEsteira1, &attr, somandoProdutos, NULL))
+    if(pthread_create(&threadMat1, &attr, sumProducts, NULL))
     {
-      fprintf(stderr, "Error creating thread 2\n");
+      fprintf(stderr, "ERROR - Thread 1 creation.\n");
       return 1;
     }
-    if(pthread_create(&pthEsteira2, &attr, somandoProdutos, NULL))
+    if(pthread_create(&threadMat2, &attr, sumProducts, NULL))
     {
-      fprintf(stderr, "Error creating thread 2\n");
+      fprintf(stderr, "ERROR - Thread 2 creation.\n");
       return 2;
     }
 
-    if(pthread_create(&pthEsteira3, &attr, somandoProdutos, NULL))
+    if(pthread_create(&threadMat3, &attr, sumProducts, NULL))
     {
-      fprintf(stderr, "Error creating thread 3\n");
+      fprintf(stderr, "ERROR - Thread 3 creation.\n");
       return 3;
     }
 
     pthread_attr_destroy(&attr);
-    if(pthread_join(pthEsteira1,NULL))
+    if(pthread_join(threadMat1,NULL))
     {
-      fprintf(stderr, "Error joining thread 2\n");
+      fprintf(stderr, "ERROR - Thread 1 join.\n");
       return 4;
     }
 
-    if(pthread_join(pthEsteira2,NULL))
+    if(pthread_join(threadMat2,NULL))
     {
-      fprintf(stderr, "Error joining thread 2\n");
+      fprintf(stderr, "ERROR - Thread 2 join.\n");
       return 5;
     }
 
-    if(pthread_join(pthEsteira3, NULL))
+    if(pthread_join(threadMat3, NULL))
     {
-      fprintf(stderr, "Error joining thread 3\n");
+      fprintf(stderr, "ERROR - Thread 3 join\n");
       return 6;
     }
   //}
 
 
-    printf("Valor de quantidade de produtos passados: %d\n", quantidadeDeProdutosPassados);
+    printf("Products Gone Through Mat: %d\n", prodCount);
 
     //iniciar o timer
-    for(a = 0; a < QTDPRODUTOS; a++)
+    for(a = 0; a < PROD_AMOUNT; a++)
     {
-      somaDosPesosDosProdutos = somaDosPesosDosProdutos + pesosDosProdutos[a];
+      prodWeightsSUM = prodWeightsSUM + prodWeights[a];
     }
     // finalizar o timer
-    printf("Valor total do peso dos produtos: %d\n", somaDosPesosDosProdutos);
-
-    printf("Deseja executar novamente? (0 para parar e 1 para continuar).\n");
-    scanf("%d", &opcaoContinuar);
+ 
+    printf("Exit? (1 YES , 0 NO).\n");
+    scanf("%d", &continue);
     while((c = getchar()) != '\n' && c != EOF){}
 
-    if(opcaoContinuar == 1)
+    if(continue == 1)
     {
-      printf("Zerando as paradas\n");
-      quantidadeDeProdutosPassados = 0;
+      // Cleaning Runtime Variables
+      prodCount = 0;
       i = 0;
       pthread_mutex_destroy(&lock);
-      for(a = 0; a < QTDPRODUTOS; a++)
+      for(a = 0; a < PROD_AMOUNT; a++)
       {
-        pesosDosProdutos[a] = 0;
+        prodWeights[a] = 0;
       }
     }
+    
     printf("Valor do J: %d\n",j);
     j++;
-  }while(opcaoContinuar == 1);
+  }while(continue == 0);
 
   pthread_exit(NULL);
 
