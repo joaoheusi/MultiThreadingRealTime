@@ -48,7 +48,7 @@ void* sumProducts(void * arg)
 int main()
 {
   srand(time(NULL));
-  int a, prodWeightsSUM = 0, continue = 1, j, c;
+  int a, prodWeightsSUM = 0, continue_ex_ex = 1, j, c;
 
   do
   {
@@ -123,10 +123,10 @@ int main()
     // finalizar o timer
  
     printf("Exit? (1 YES , 0 NO).\n");
-    scanf("%d", &continue);
+    scanf("%d", &continue_ex);
     while((c = getchar()) != '\n' && c != EOF){}
 
-    if(continue == 1)
+    if(continue_ex_ex == 1)
     {
       // Cleaning Runtime Variables
       prodCount = 0;
@@ -137,10 +137,10 @@ int main()
         prodWeights[a] = 0;
       }
     }
-    
+
     printf("Valor do J: %d\n",j);
     j++;
-  }while(continue == 0);
+  }while(continue_ex == 0);
 
   pthread_exit(NULL);
 
