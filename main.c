@@ -48,7 +48,7 @@ void* sumProducts(void * arg)
 int main()
 {
   srand(time(NULL));
-  int a, prodWeightsSUM = 0, continue_ex_ex = 1, j, c;
+  int a, prodWeightsSUM = 0, continue_ex = 1, j, c;
 
   do
   {
